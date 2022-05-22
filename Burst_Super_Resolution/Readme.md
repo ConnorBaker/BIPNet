@@ -1,3 +1,28 @@
+## Connor's hasty notes
+
+- `pwcnet` is taken from <https://github.com/sniklaus/pytorch-pwc>
+    - Using `download.bash`, needed to rename `network-default.pytorch` to `pwcnet-network-default.pth`
+- Tested and working inside NVIDIA's PyTorch NGC container image `nvcr.io/nvidia/pytorch:22.04-py3` (see <https://catalog.ngc.nvidia.com/orgs/nvidia/containers/pytorch>) when using the NVIDIA gpu-optimized AMI (see <https://aws.amazon.com/marketplace/pp/prodview-7ikjtg3um26wq>) on a `g5.4xlarge`
+
+```bash
+# Assuming the repository was cloned on the host into /workspace, start the container with
+docker run --gpus all -it -v /workspace:/workspace nvcr.io/nvidia/pytorch:22.04-py3
+
+# Set up conda
+conda init bash && source /root/.bashrc
+
+# Install, initialize, and update mamba
+conda install mamba -c conda-forge --yes
+mamba init bash && source /root/.bashrc
+mamba update --all --yes
+
+# Enter the BIPNet directory
+cd BIPNet
+
+# Use the "lock" file to create a more reproducible environment.
+mamba env create --file environment.lock.yml
+```
+
 ## NTIRE 2021 Burst Super-Resolution Challenge - Track 1 Synthetic
 ### Training
 - Download [Zurich RAW to RGB dataset](http://people.ee.ethz.ch/~ihnatova/pynet.html#dataset).

@@ -75,8 +75,11 @@ class BurstSR_Test_Network():
         SSIM = []
         
         for i, data in enumerate(test_data_loader):
-
-            burst, labels, meta_info_burst, meta_info_gt, burst_name = data            
+            # This does not return five values, but rather four.
+            # This is commented out and the name of the burst is retrieved in the following line.
+            # burst, labels, meta_info_burst, meta_info_gt, burst_name = data
+            burst, labels, meta_info_burst, meta_info_gt = data
+            burst_name = test_dataset.get_burst_info(i)['burst_name']
             meta_info_burst = convert_dict(meta_info_burst, burst.shape[0])
             
             burst_rgb = rgb2raw.demosaic(burst[0])            
@@ -119,7 +122,7 @@ class BurstSR_Test_Network():
 
             #output = np.concatenate((input_burst, output, labels), axis=1)
             
-            cv2.imwrite('{}/{}'.format(result_dir, burst_name[0] +'.png'), output)
+            cv2.imwrite('{}/{}'.format(result_dir, burst_name +'.png'), output)
         
         Average_PSNR = sum(PSNR)/len(PSNR)
         Average_SSIM = sum(SSIM)/len(SSIM)

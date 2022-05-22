@@ -1,0 +1,5 @@
+__pycache__
+.DS_Store
+.vscode
+Burst_Super_Resolution/val.zip
+Burst_Super_Resolution/burstsr_dataset
