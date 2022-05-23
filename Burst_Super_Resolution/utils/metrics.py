@@ -1,5 +1,7 @@
 import math
+from typing import Any, Optional
 import torch
+from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
 import utils.spatial_color_alignment as sca_utils
@@ -14,11 +16,11 @@ from utils.warp import warp
 
 
 class L2(nn.Module):
-    def __init__(self, boundary_ignore=None):
+    def __init__(self, boundary_ignore: Any =None):
         super().__init__()
         self.boundary_ignore = boundary_ignore
 
-    def forward(self, pred, gt, valid=None):
+    def forward(self, pred: Tensor, gt: Tensor, valid: Optional[Tensor]=None) -> Tensor:
         if self.boundary_ignore is not None:
             pred = pred[..., self.boundary_ignore:-self.boundary_ignore, self.boundary_ignore:-self.boundary_ignore]
             gt = gt[..., self.boundary_ignore:-self.boundary_ignore, self.boundary_ignore:-self.boundary_ignore]
@@ -42,26 +44,24 @@ class L2(nn.Module):
 
 
 class PSNR(nn.Module):
-    def __init__(self, boundary_ignore=None, max_value=1.0):
+    def __init__(self, boundary_ignore: Any=None, max_value: float=1.0):
         super().__init__()
-        self.l2 = L2(boundary_ignore=boundary_ignore)
+        self.l2 = L2(boundary_ignore)
         self.max_value = max_value
 
-    def psnr(self, pred, gt, valid=None):
+    def psnr(self, pred: Tensor, gt: Tensor, valid: Optional[Tensor]=None) -> Tensor:
         mse = self.l2(pred, gt, valid=valid)
-
         psnr = 20 * math.log10(self.max_value) - 10.0 * mse.log10()
-
         return psnr
 
-    def forward(self, pred, gt, valid=None):
+    def forward(self, pred: Tensor, gt: Tensor, valid: Optional[Tensor]=None) -> Tensor:
         assert pred.dim() == 4 and pred.shape == gt.shape
         if valid is None:
             psnr_all = [self.psnr(p.unsqueeze(0), g.unsqueeze(0)) for p, g in
                         zip(pred, gt)]
         else:
             psnr_all = [self.psnr(p.unsqueeze(0), g.unsqueeze(0), v.unsqueeze(0)) for p, g, v in zip(pred, gt, valid)]
-        psnr = sum(psnr_all) / len(psnr_all)
+        psnr: Tensor = sum(psnr_all) / len(psnr_all)
         return psnr
 
 
@@ -70,7 +70,7 @@ class PSNR(nn.Module):
 #################################################################################
 
 class AlignedL1(nn.Module):
-    def __init__(self, alignment_net, sr_factor=4, boundary_ignore=None):
+    def __init__(self, alignment_net, sr_factor: int=4, boundary_ignore: Any=None):
         super().__init__()
         self.sr_factor = sr_factor
         self.boundary_ignore = boundary_ignore

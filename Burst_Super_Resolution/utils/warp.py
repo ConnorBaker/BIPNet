@@ -1,9 +1,11 @@
 import torch
-import torch.nn as nn
+from torch import Tensor
 import torch.nn.functional as F
 
 
-def warp(feat, flow, mode='bilinear', padding_mode='zeros'):
+def warp(
+    feat: Tensor, flow: Tensor, mode: str = "bilinear", padding_mode: str = "zeros"
+) -> Tensor:
     """
     warp an image/tensor (im2) back to im1, according to the optical flow im1 --> im2
 
@@ -12,10 +14,12 @@ def warp(feat, flow, mode='bilinear', padding_mode='zeros'):
     flow: [B, 2, H, W] flow (x, y)
 
     """
-    B, C, H, W = feat.size()
+    _, _, H, W = feat.size()
 
     # mesh grid
-    rowv, colv = torch.meshgrid([torch.arange(0.5, H + 0.5), torch.arange(0.5, W + 0.5)])
+    rowv, colv = torch.meshgrid(
+        [torch.arange(0.5, H + 0.5), torch.arange(0.5, W + 0.5)]
+    )
     grid = torch.stack((colv, rowv), dim=0).unsqueeze(0).float().to(feat.device)
     grid = grid + flow
 
@@ -27,6 +31,8 @@ def warp(feat, flow, mode='bilinear', padding_mode='zeros'):
 
     grid_norm = grid_norm.permute(0, 2, 3, 1)
 
-    output = F.grid_sample(feat, grid_norm, mode=mode, padding_mode=padding_mode, align_corners=True)
+    output = F.grid_sample(
+        feat, grid_norm, mode=mode, padding_mode=padding_mode, align_corners=True
+    )
 
     return output
